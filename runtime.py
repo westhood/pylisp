@@ -1,19 +1,23 @@
 import cStringIO
 
+
 class Closure(object):
     def __init__(self, proto, frame):
-        self.proto = proto 
+        self.proto = proto
         self.upvars = []
-        for type, index, scope_index in proto.upvars:
-            if type == "local":
+
+        for kind, index, scope_index in proto.upvars:
+            if kind == "local":
                 upvar = Upvar(frame, index, scope_index)
                 self.upvars.append(upvar)
-            elif type == "varg":
+            elif kind == "varg":
                 self.upvars.append(UpvarForVarg(frame))
-            elif type == "up":
+            elif kind == "up":
                 self.upvars.append(frame.upvars[index])
-            else: assert 0
-        
+            else:
+                assert 0
+
+
 class UpvarForVarg(object):
     def __init__(self, frame):
         self.frame = frame
@@ -38,6 +42,7 @@ class UpvarForVarg(object):
             del self.frame
             self.closed = True
 
+
 class Upvar(object):
     CLOSED = 0
     OPEN = 1
@@ -46,8 +51,8 @@ class Upvar(object):
         self.frame = frame
         self.index = index
         self.stat = Upvar.OPEN
-        self.scope_index = scope_index 
-    
+        self.scope_index = scope_index
+
     def get(self):
         if self.stat == Upvar.CLOSED:
             return self.value
@@ -61,10 +66,12 @@ class Upvar(object):
             self.frame.localvars[self.index] = value
 
     def close(self):
+        print "close"
         assert self.stat == Upvar.OPEN
         self.value = self.frame.localvars[self.index]
         del self.frame
         self.stat == Upvar.CLOSED
+
 
 def build_list(seq):
     ret = None
@@ -74,14 +81,16 @@ def build_list(seq):
         ret = cons(i, ret)
     return ret
 
+
 def sclist2pylist(l):
     ret = []
     while l:
-        head , l = l.car(), l.cdr()
+        head, l = l.car(), l.cdr()
         if isinstance(head, LinkList):
             head = sclist2pylist(head)
-        ret.append(head)    
+        ret.append(head)
     return ret
+
 
 class LinkList(object):
     def __init__(self, v, next=None):
@@ -97,7 +106,7 @@ class LinkList(object):
         return self.v
 
     def cdr(self):
-        return self.next 
+        return self.next
 
     def __str__(self):
         n = self
@@ -121,6 +130,7 @@ class LinkList(object):
 
         return list_eq(self, other)
 
+
 def list_eq(a, b):
     while 1:
         if a.car() != b.car():
@@ -133,33 +143,20 @@ def list_eq(a, b):
             return False
 
 
-
 def cons(x, y):
     if not isinstance(y, LinkList):
         return LinkList(x, next=y)
     else:
         return y.cons(x)
 
+
 def car(x):
     if not isinstance(x, LinkList):
         raise ValueError("Unsupported operation car")
     return x.car()
 
+
 def cdr(x):
     if not isinstance(x, LinkList):
         raise ValueError("Unsupported operation cdr")
     return x.cdr()
-
-
-if __name__ == '__main__':
-    x = [1, 2, 3]
-    assert x == sclist2pylist(build_list(x))
-    x = [1, 2, [3,4]]
-    assert x == sclist2pylist(build_list(x))
-    x = [[3,4],[5,6]]
-    assert x == sclist2pylist(build_list(x))
-    x = [1]
-    assert x == sclist2pylist(build_list(x))
-    x = []
-    assert x == sclist2pylist(build_list(x))
-    print "ok"

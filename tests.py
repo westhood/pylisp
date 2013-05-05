@@ -194,5 +194,21 @@ class Lisp(unittest.TestCase):
         (assert (sum 1 100000) 5000050000)
         """
 
+
+class LispList(unittest.TestCase):
+    def test_sclist2pylist(self):
+        from runtime import sclist2pylist, build_list
+        x = [1, 2, 3]
+        assert x == sclist2pylist(build_list(x))
+        x = [1, 2, [3, 4]]
+        assert x == sclist2pylist(build_list(x))
+        x = [[3, 4], [5, 6]]
+        assert x == sclist2pylist(build_list(x))
+        x = [1]
+        assert x == sclist2pylist(build_list(x))
+        x = []
+        assert x == sclist2pylist(build_list(x))
+
+
 if __name__ == '__main__':
     unittest.main()
