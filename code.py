@@ -185,8 +185,7 @@ def GenLambdaV(ast, symbol, generator, isTail=False, name=None):
     symbol.pop()
     proto = generator.popProto()
     # load closure for lambda in original proto.
-    generator.gen((OpLoadConst, proto.indexInConsts))
-    generator.gen((OpBuildClosure, -1))
+    generator.gen((OpBuildClosure, proto.indexInConsts))
 
 def GenLambda(ast, symbol, generator, isTail=False, name=None):
     """ (lambda (arg1 arg2) (body)) """
@@ -215,11 +214,10 @@ def GenLambda(ast, symbol, generator, isTail=False, name=None):
     symbol.pop()
     proto = generator.popProto()
     # load closure for lambda in original proto.
-    generator.gen((OpLoadConst, proto.indexInConsts))
-    generator.gen((OpBuildClosure, -1))
+    generator.gen((OpBuildClosure, proto.indexInConsts))
 
 def GenCallCC(ast, symbol, generator, isTail=False, name=None):
-    # FIXME: 
+    # FIXME:
     assert ast[0].type == "keyword" and ast[0].info == "call/cc"
     assert len(ast[1])
     GenExp(ast[1], symbol, generator, isTail)
