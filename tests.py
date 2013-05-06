@@ -1,5 +1,5 @@
 import unittest
-import parser
+from parser import Parser, Transform, traverse
 import code
 import vm
 import cStringIO
@@ -8,11 +8,10 @@ import functools
 
 
 def compile(source):
-    s = cStringIO.StringIO(source)
-    lex = parser.Lexer(s)
-    visitor = parser.Transform()
-    ast = parser.exprs(lex)
-    parser.traverse(ast, visitor)
+    p = Parser(source)
+    visitor = Transform()
+    ast = p.exprs()
+    traverse(ast, visitor)
     consts = code.generate(ast)
     return consts
 
