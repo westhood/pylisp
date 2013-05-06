@@ -66,7 +66,6 @@ class Upvar(object):
             self.frame.localvars[self.index] = value
 
     def close(self):
-        print "close"
         assert self.stat == Upvar.OPEN
         self.value = self.frame.localvars[self.index]
         del self.frame

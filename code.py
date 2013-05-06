@@ -16,6 +16,7 @@ def GenExp(ast, symbol, generator, isTail=False):
     if not isinstance(ast, list):
         SinglarExp(ast, symbol, generator)
         return
+
     type, info = ast[0].type, ast[0].info
     if type == "keyword":
         if info == "begin":
@@ -30,8 +31,7 @@ def GenExp(ast, symbol, generator, isTail=False):
             GenLambdaV(ast, symbol, generator, isTail)
         elif info == "define":
             GenDefine(ast, symbol, generator, isTail)
-        elif info == "call/cc":
-            GenCallCC(ast, symbol, generator, isTail)
+
     elif type == "symbol":
         if info in Symbol2BinOp:
             GenBinOp(ast, symbol, generator, isTail)
@@ -220,15 +220,6 @@ def GenLambda(ast, symbol, generator, isTail=False, name=None):
     generator.gen((OpBuildClosure, proto.indexInConsts))
 
 
-def GenCallCC(ast, symbol, generator, isTail=False, name=None):
-    # FIXME:
-    assert ast[0].type == "keyword" and ast[0].info == "call/cc"
-    assert len(ast[1])
-    GenExp(ast[1], symbol, generator, isTail)
-    generator.gen((OpBuildContinuation, -1))
-    generator.gen((OpCall, 1))
-
-
 class CodeGenerator(object):
     def __init__(self, consts, proto):
         # pc indicates address of the next instruction to be generated.
@@ -278,16 +269,18 @@ class ConstTable(object):
     def addLiteral(self, literal):
         if literal in self.literals:
             return self.literals[literal]
+
         self.consts.append(literal)
         index = len(self.consts) - 1
         self.literals[literal] = index
+
         return index
 
     def __getitem__(self, index):
         return self.consts[index]
 
     def __iter__(self):
-        return self.consts.__iter__()
+        return iter(self.consts)
 
 
 class FunctionProto(object):

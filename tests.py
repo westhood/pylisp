@@ -149,17 +149,6 @@ class Lisp(unittest.TestCase):
         """
         self.run_script(s, debug=True)
 
-    @run_doc()
-    def test_cc(self):
-        """
-        (define (func x)
-            (call/cc
-                (lambda (f)
-                    (if x (f 2) 3))))
-        (assert (func 1) 2)
-        (assert (func 0) 3)
-        """
-
     @run_doc(["(4 1 2 3)"])
     def test_uparforvarg(self):
         """

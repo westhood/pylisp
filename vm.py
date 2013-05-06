@@ -3,29 +3,8 @@ from const import *
 from runtime import LinkList, build_list, Closure
 
 
-class DummyFrame(object):
-    pass
-
-
 class VMException(Exception):
     pass
-
-
-def clone(frame):
-    new = DummyFrame()
-    new.proto = frame.proto
-    new.insts = frame.insts
-    new.upvars = frame.upvars
-    new.localvars = frame.localvars[:]
-    new.stack = frame.stack[:]
-    new.to_be_forked = False
-
-    if hasattr(frame, "varargs"):
-        new.varargs = frame.varargs
-
-    if hasattr(frame, "saved_pc"):
-        new.saved_pc = frame.saved_pc
-    return new
 
 
 class Frame(object):
@@ -56,27 +35,8 @@ class Frame(object):
         self.stack = []
 
 
-def fork_frames(frames):
-    if frames.cdr() is None:
-        old = frames.car()
-        new = clone(old)
-        return LinkList(new), LinkList(old)
-
-    upper = frames.cdr().car()
-    upper.to_be_forked = True
-    current = frames.car()
-    new = clone(current)
-    news = frames.cdr().cons(new)
-    return news, frames
-
-
-class Continuation(object):
-    pass
-
-
 def close_upvars(frame, scope_index):
     for upvar in frame.upvars:
-        print upvar
         if upvar.frame is frame and upvar.scope_index == index:
             upvar.close()
 
@@ -87,9 +47,7 @@ class VM(object):
         self.env = env
         if not entry:
             entry = consts[-1]
-        frame = Frame(entry, [], [])
-        frames = LinkList(frame)
-        self.frames = frames
+        self.frames = [Frame(entry, [], [])]
         self.debug = debug
 
     def inst2str(self, inst):
@@ -118,7 +76,7 @@ class VM(object):
         env = self.env
         consts = self.consts
         frames = self.frames
-        frame = frames.car()
+        frame = frames.pop()
         insts = frame.insts
         pc = 0
 
@@ -198,20 +156,13 @@ class VM(object):
                     upvars = closure.upvars
                     new_frame = Frame(proto, upvars, args)
                     frame.saved_pc = pc
-                    frames = frames.cons(new_frame)
-                    frame = frames.car()
+
+                    frames.append(frame)
+                    frame = new_frame
+
                     insts = frame.insts
                     pc = 0
                     continue
-
-                elif isinstance(closure, Continuation):
-                    frames = closure.frames
-                    frame = frames.car()
-                    insts = frame.insts
-                    pc = frame.saved_pc
-                    assert len(args) == 1
-                    frame.stack.extend(args)
-
                 else:
                     ret = closure(*args)
                     frame.stack.extend(ret or [])
@@ -227,47 +178,21 @@ class VM(object):
                 if isinstance(closure, Closure):
                     proto = closure.proto
                     upvars = closure.upvars
-                    new_frame = Frame(proto, upvars, args)
-                    frames = frames.cdr().cons(new_frame)
-                    frame = frames.car()
+                    frame = Frame(proto, upvars, args)
                     insts = frame.insts
                     pc = 0
                     continue
-
-                elif isinstance(closure, Continuation):
-                    frames = closure.frames
-                    frame = frames.car()
-                    insts = frame.insts
-                    pc = frame.saved_pc
-                    assert len(args) == 1
-                    frame.stack.extend(args)
-
                 else:
                     ret = closure(*args)
-                    frame.stack.extend(ret)
+                    frame.stack.extend(ret or [])
 
             elif operator == OpRet:
                 rets = frame.stack[-operand:]
                 close_upvars(frame, 0)
-                # load upper frame
-                frames = frames.cdr()
-                if frames.car().to_be_forked:
-                    new, old = fork_frames(frames)
-                    frames = new
-                frame = frames.car()
+                frame = frames.pop()
                 pc = frame.saved_pc
                 insts = frame.insts
                 frame.stack.extend(rets)
-
-            elif operator == OpBuildContinuation:
-                new, old = fork_frames(frames)
-                old.car().stack.pop()
-                old.car().saved_pc = pc + 1
-                cc = Continuation()
-                cc.frames = old
-                frames = new
-                frame = frames.car()
-                frame.stack.append(cc)
 
             elif operator == OpJump:
                 pc += operand
