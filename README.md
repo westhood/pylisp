@@ -1,6 +1,4 @@
-# PyLisp: A simple Lisp Implementation in Python
-
----
+# pylisp: A simple Lisp Implementation in Python
 
 ## Description ##
 
