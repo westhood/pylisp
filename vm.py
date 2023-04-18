@@ -1,8 +1,14 @@
-from const import *
+from const import (
+    OpRet, OpLoad, OpLoadLocal ,OpBinOp ,OpCall ,OpJump ,OpTest, OpLoadConst, 
+    OpTailCall, OpPop, OpUnOp, OpLoadVarg, OpSetLocal, OpLoadLocal, 
+    OpLoadGlobal, OpSetGlobal, OpBuildClosure, OpLoadUpvar, OpCloseUpvar, OpSetUpvar, OpBuildClosure, 
+    OpBuildContinuation, OpHalt, VMOps, 
+    BinOps, UnOps, 
+    Symbol2UnOp, 
+    Symbol2BinOp 
+)
 
 from runtime import LinkList, build_list, Closure
-
-
 class VMException(Exception):
     pass
 
