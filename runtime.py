@@ -1,4 +1,4 @@
-import cStringIO
+import io
 
 
 class Closure(object):
@@ -109,7 +109,7 @@ class LinkList(object):
 
     def __str__(self):
         n = self
-        sb = cStringIO.StringIO()
+        sb = io.StringIO()
         sb.write("(%s" % self.v)
         try:
             while n.next:

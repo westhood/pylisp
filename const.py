@@ -62,7 +62,7 @@ BinOps = dict([
     (1, ("+", operator.add)),
     (2, ("-", operator.sub)),
     (3, ("*", operator.mul)),
-    (4, ("/", operator.div)),
+    (4, ("/", operator.truediv)),
     (5, ("cons", runtime.cons)),
     (6, ("=", operator.eq)),
     (7, (">", operator.gt)),

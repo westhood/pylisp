@@ -84,7 +84,7 @@ class VM(object):
             try:
                 operator, operand = insts[pc]
                 if self.debug:
-                    print self.inst2str(insts[pc])
+                    print(self.inst2str(insts[pc]))
             except IndexError:
                 return
 
