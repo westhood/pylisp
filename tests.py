@@ -2,7 +2,7 @@ import unittest
 from parser import Parser, Transform, traverse
 import code
 import vm
-import cStringIO
+import io
 import runtime
 import functools
 
@@ -60,7 +60,7 @@ class Lisp(unittest.TestCase):
         m.start()
 
     def setUp(self):
-        outputs = cStringIO.StringIO()
+        outputs = io.StringIO()
 
         def display(*args):
             for arg in args:

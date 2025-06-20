@@ -1,5 +1,6 @@
 import re
-from itertools import ifilter
+from functools import reduce
+
 
 
 class ParseException(Exception):
@@ -68,7 +69,7 @@ class Lexer(object):
     def __init__(self, src):
         self.s = src
         self.buffer = []
-        self.tokens = ifilter(lambda x: x.type not in self.skip, self.tokenize(src))
+        self.tokens = filter(lambda x: x.type not in self.skip, self.tokenize(src))
 
     def tokenize(self, s):
         lineno = 1
@@ -81,7 +82,7 @@ class Lexer(object):
             if not m:
                 break
 
-            groups = filter(lambda x: x[1] is not None, m.groupdict().items())
+            groups = [(n, v) for n, v in m.groupdict().items() if v is not None]
             assert len(groups) == 1
             name, value = groups[0]
 
@@ -112,8 +113,8 @@ class Lexer(object):
             return self.buffer.pop()
         else:
             try:
-                next = self.tokens.next()
-                return next
+                nxt = next(self.tokens)
+                return nxt
             except StopIteration:
                 return
 
