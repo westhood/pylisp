@@ -4,6 +4,10 @@
 
 The syntax used in PyList is similar to the syntax of scheme in [SICP](http://mitpress.mit.edu/sicp/). You can regard the project as a exercise after learning Chapter 4 and 5 of [SICP](http://mitpress.mit.edu/sicp/).
 
+## Requirements ##
+
+* Python 3.6 or higher
+
 ## Example ##
 1. A Loop to sum integers
 
